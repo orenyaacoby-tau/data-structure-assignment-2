@@ -8,9 +8,11 @@
  */
 public class Heap
 {
+    public int totalCuts = 0;
+    public int totalHeapifyCosts = 0;
     public final boolean lazyMelds;
     public final boolean lazyDecreaseKeys;
-    public HeapNode min;
+    public HeapItem min;
     
     /**
      *
@@ -31,7 +33,7 @@ public class Heap
      * Insert (key,info) into the heap and return the newly generated HeapNode.
      *
      */
-    public HeapNode insert(int key, String info) 
+    public HeapItem insert(int key, String info) 
     {    
         return null; // should be replaced by student code
     }
@@ -41,7 +43,7 @@ public class Heap
      * Return the minimal HeapNode, null if empty.
      *
      */
-    public HeapNode findMin()
+    public HeapItem findMin()
     {
         return null; // should be replaced by student code
     }
@@ -63,17 +65,41 @@ public class Heap
      * Decrease the key of x by diff and fix the heap.
      * 
      */
-    public void decreaseKey(HeapNode x, int diff) 
-    {    
-        return; // should be replaced by student code
+
+
+    public void decreaseKey(HeapItem x, int diff) 
+    {     
+        if(this.lazyDecreaseKeys == false){
+
+            x.key -= diff;
+            heapifyUp(x.node);
+            return;
+        }
+        
+        x.key -= diff;
+        if(x.node.parent == null){    //if the node is the root
+                if(x.key < this.min.key) min = x;
+                return;
+            }
+
+        if(x.node.parent.item.key <= x.key) return; //doesnt violte the heap role 
+
+        cascadingCut(x.node);
+        if(x.key < this.min.key) {
+        this.min = x;
     }
+
+    }
+
+
+
 
     /**
      * 
      * Delete the x from the heap.
      *
      */
-    public void delete(HeapNode x) 
+    public void delete(HeapItem x) 
     {    
         return; // should be replaced by student code
     }
@@ -87,6 +113,27 @@ public class Heap
      */
     public void meld(Heap heap2)
     {
+        HeapNode nodeA = this.min.node;
+        HeapNode nodeB = heap2.min.node;
+        HeapNode nextA = nodeA.next;
+        HeapNode nextB = nodeB.next;
+
+        nodeA.next = nextB;  //linking the two lists
+        nextB.prev = nodeA;
+
+        nodeB.next = nextA;
+        nextA.prev = nodeB;
+
+        if(this.lazyMelds == true) return;
+
+        //====neet to add the option if lazyMelds is false===//
+
+        
+
+        
+
+
+
         return; // should be replaced by student code           
     }
     
@@ -158,16 +205,76 @@ public class Heap
     
     
     /**
-     * Class implementing a node in a ExtendedFibonacci Heap.
+     * Class implementing a node in a Heap.
      *  
      */
     public static class HeapNode{
-        public int key;
-        public String info;
+        public HeapItem item;
         public HeapNode child;
         public HeapNode next;
         public HeapNode prev;
         public HeapNode parent;
         public int rank;
+        public boolean marked = false;
     }
+    
+    /**
+     * Class implementing an item in a Heap.
+     *  
+     */
+    public static class HeapItem{
+        public HeapNode node;
+        public int key;
+        public String info;
+    }
+
+    /**==================== helper_methods ====================*/
+    private void heapifyUp(HeapNode node) {
+    while (node.parent != null && node.parent.item.key > node.item.key) {
+        totalHeapifyCosts++;    
+        HeapItem parentItem = node.parent.item;
+        HeapItem childItem = node.item;
+
+        node.parent.item = childItem;
+        node.item = parentItem;
+
+        node.parent.item.node = node.parent;
+        node.item.node = node;
+
+        node = node.parent;
+    }
+    }
+
+
+
+    private void cascadingCut(HeapNode node){
+        do{
+            HeapNode parent = node.parent;
+            this.totalCuts ++;
+            parent.rank --;
+            if(parent.child == node){        //cutting the child 
+                if(node.next == node) parent.child = null;
+                else parent.child = node.next;
+            }
+        node.next.prev =  node.prev;
+        node.prev.next = node.next;
+        node.next = node;
+        node.prev = node;
+        node.parent = null;
+        node.marked = false;
+
+        Heap tmpHeap = new Heap(this.lazyMelds ,this.lazyDecreaseKeys);  //creating new heap
+        tmpHeap.min = node.item;
+        this.meld(tmpHeap);
+
+        if(parent.parent == null) break;  //if the parent is a root 
+        if(parent.marked == false){       //if the parent is not marked 
+            parent.marked = true;
+            break;
+        }
+        node = parent;
+        }
+        while(true);
+}
+
 }
