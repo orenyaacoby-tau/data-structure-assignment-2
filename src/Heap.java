@@ -1,3 +1,7 @@
+
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  * Heap
  *
@@ -15,6 +19,7 @@ public class Heap
     public final boolean lazyMelds;
     public final boolean lazyDecreaseKeys;
     public HeapItem min;
+    private HeapNodeList rootList; //list of root nodes
     
     
     /**
@@ -27,6 +32,7 @@ public class Heap
         this.lazyMelds = lazyMelds;
         this.lazyDecreaseKeys = lazyDecreaseKeys;
         // student code can be added here
+        
     }
 
     /**
@@ -66,7 +72,7 @@ public class Heap
      */
     public HeapItem findMin()
     {
-        return null; // should be replaced by student code
+        return this.min; // should be replaced by student code
     }
 
     /**
@@ -122,6 +128,8 @@ public class Heap
      */
     public void delete(HeapItem x) 
     {    
+        this.decreaseKey(x, x.key);
+        this.deleteMin();
         return; // should be replaced by student code
     }
 
@@ -259,6 +267,95 @@ public class Heap
         public String info;
     }
 
+    /**
+     * class implementing a list of HeapNodes
+     * @param node
+     */
+    public static class HeapNodeList implements Iterable<HeapNode>{
+        public HeapNode start;
+        public HeapNode end;
+        public int size = 0;
+
+        public HeapNodeList(HeapNode node){
+            this.start = node;
+            this.end = node;
+            this.size = 1;
+        }
+        public HeapNodeList(){
+            this.start = null;
+            this.end = null;
+            this.size = 0;
+        }
+
+        public void add(HeapNode node){
+            this.end.next = node;
+            node.prev = this.end;
+            this.end = node;
+            this.size ++;
+            if (this.start == null){
+                this.start = node;
+            }
+        }
+        public void remove(HeapNode node){
+            assert this.size !=0;
+            if(this.size == 1){
+                this.start = null;
+                this.end = null;
+            } else {
+                if(node == this.start){
+                    this.start = node.next;
+                }
+                else{
+                    if(node == this.end){
+                        this.end = node.prev;
+                    }
+                    else{
+                        node.prev.next = node.next;
+                        node.next.prev = node.prev;
+                    }
+            }
+            }
+            this.size --;
+        }
+      //  @pre // afterNode in list
+        public void insertAfter(HeapNode node, HeapNode afterNode){
+            assert this.size !=0;
+            HeapNode nextNode = afterNode.next;
+            afterNode.next = node;
+            node.prev = afterNode;
+            node.next = nextNode;
+            nextNode.prev = node;
+        }
+        public void link(HeapNodeList other){
+            this.end.next = other.start;
+            other.start.prev = this.end;
+            this.end = other.end;
+            this.size += other.size;
+        }
+
+        @Override
+        public java.util.Iterator<HeapNode> iterator() {
+            return new java.util.Iterator<HeapNode>() {
+                private HeapNode current = start;
+                private int count = 0;
+
+                @Override
+                public boolean hasNext() {
+                    return count < size;
+                }
+
+                @Override
+                public HeapNode next() {
+                    HeapNode temp = current;
+                    current = current.next;
+                    count++;
+                    return temp;
+                }
+            };
+        }
+
+    }
+
     /**==================== helper_methods ====================*/
     private void heapifyUp(HeapNode node) {
     while (node.parent != null && node.parent.item.key > node.item.key) { //while the node is not a root and we...
@@ -302,7 +399,7 @@ public class Heap
 
         if(parent.marked == false){       //if the parent is not marked 
             parent.marked = true;
-            this.totalMarkedNodes ++
+            this.totalMarkedNodes ++;
             break;
         }
         node = parent;
@@ -311,10 +408,57 @@ public class Heap
         }
 
     private void successive_linking(){
+        int[] rankArray = new int[this.size + 1]; //array to store the nodes of each rank, all zeros
+        HeapNode[] nodesByRank = new HeapNode[this.size + 1]; //array to store the nodes of each rank, all nulls
+
+
+        for (HeapNode root : this.rootList) {
+            int rank = root.rank;
+            if (rankArray[rank] == 0){
+                rankArray[rank] =1;
+                nodesByRank[rank] = root;
+            } else {
+                while (rankArray[rank] != 0) {
+                    root = link(root, nodesByRank[rank]); //linking the two nodes
+                    rankArray[rank] = 0;
+                    nodesByRank[rank] = null;
+                    rank++;
+                    assert rank == root.rank;
+                }
+                rankArray[rank] =1;
+                nodesByRank[rank] = root;
+            }
+        }
         return;
     }
 
+    /**@pre // ranks must be equal, 
+     *  both nodes must be root nodes
+    */
+    private HeapNode link(HeapNode nodeA, HeapNode nodeB){
+        assert (nodeA.rank != nodeB.rank); // ranks must be equal
+        if(nodeA.item.key > nodeB.item.key){
+            HeapNode temp = nodeA;
+            nodeA = nodeB;
+            nodeB = temp;
+        }
+        // nodeA<nodeB
+        this.rootList.remove(nodeB); // removing nodeB from the root list
 
-    
+        if(nodeA.rank == 0){
+            nodeA.child = nodeB;
+            nodeB.parent = nodeA;
+            nodeA.rank = 1;
+        } else {
+            HeapNode child = nodeA.child;
+            nodeB.next = child;
+            nodeB.prev = child.prev;
+            child.prev = nodeB;
+            nodeB.prev.next = nodeB;
+        }
+        nodeB.parent = nodeA;
+        nodeA.rank ++;
+        return nodeA;
+    }
 
 }
