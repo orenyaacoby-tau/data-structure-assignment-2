@@ -84,9 +84,50 @@ public class Heap
      */
     public void deleteMin()
     {
+        if(this.min == null) return; //if the heap is empty
+        if(this.size == 1){ //if the heap has one item
+            this.min = null;
+            this.rootList = new HeapNodeList();
+            this.size = 0;
+            return;
+        }
+        HeapNode minNode = this.min.node;
+        this.size --;
+        this.rootList.remove(minNode); //removing the min node from the root list
+        if(minNode.rank > 0){ //if the min node has children    
+            addChildrenToRootList(minNode);
+        }
+        updateMin();
+        successive_linking();
+
+
         return; // should be replaced by student code
     }
+    // helper method for deleteMin
+    private void addChildrenToRootList(HeapNode minNode){
+        HeapNode child = minNode.child;
+        HeapNode nextChild;
+        HeapNode firstChild = child;
 
+        while(child != null){ //adding all the children to the root list
+            nextChild = child.next;
+            this.rootList.add(child);
+            child = nextChild;
+            if(child.equals(firstChild)) break; //to avoid infinite loop
+        }
+    }
+    // helper method for deleteMin
+    private void updateMin(){
+        assert (this.rootList.size >= 0);
+        HeapNode current = this.rootList.start;
+        HeapItem minItem = current.item;
+        for(HeapNode node : this.rootList){
+            if(node.item.key < minItem.key){
+                minItem = node.item;
+            }
+        }
+        this.min = minItem;
+    }
     /**
      * 
      * pre: 0<=diff<=x.key
@@ -428,7 +469,6 @@ public class Heap
             } else {
                 while (rankArray[rank] != 0) {
                     root = link(root, nodesByRank[rank]); //linking the two nodes
-                    this.totalLinks++; //updating the total links
                     rankArray[rank] = 0;
                     nodesByRank[rank] = null;
                     rank++;
@@ -467,6 +507,8 @@ public class Heap
         }
         nodeB.parent = nodeA;
         nodeA.rank ++;
+        nodeA.child = nodeB;
+        this.totalLinks++; //incrementing the total links
         return nodeA;
     }
 
