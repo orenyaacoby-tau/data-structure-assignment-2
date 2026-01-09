@@ -16,6 +16,7 @@ public class Heap
     public int totalMarkedNodes = 0;
     public int totalCuts = 0;
     public int totalHeapifyCosts = 0;
+    public int totalLinks = 0;
     public final boolean lazyMelds;
     public final boolean lazyDecreaseKeys;
     public HeapItem min;
@@ -160,11 +161,15 @@ public class Heap
         HeapNode nextA = nodeA.next;
         HeapNode nextB = nodeB.next;
 
+        this.rootList.link(heap2.rootList);
+
+        /*  //old linking method
         nodeA.next = nextB;  //linking the two lists
         nextB.prev = nodeA;
 
         nodeB.next = nextA;
         nextA.prev = nodeB;
+         */
 
         if(this.min.key > heap2.min.key){  //updating the min 
             this.min = heap2.min;
@@ -195,7 +200,7 @@ public class Heap
      */
     public int numTrees()
     {
-        return; // should be replaced by student code
+        return this.rootList.size; // should be replaced by student code
     }
     
     
@@ -217,7 +222,7 @@ public class Heap
      */
     public int totalLinks()
     {
-        return 46; // should be replaced by student code
+        return this.totalLinks; // should be replaced by student code
     }
     
     
@@ -420,6 +425,7 @@ public class Heap
             } else {
                 while (rankArray[rank] != 0) {
                     root = link(root, nodesByRank[rank]); //linking the two nodes
+                    this.totalLinks++; //updating the total links
                     rankArray[rank] = 0;
                     nodesByRank[rank] = null;
                     rank++;
