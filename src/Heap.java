@@ -60,6 +60,7 @@ public class Heap
         Heap heap2 = new Heap(this.lazyMelds,this.lazyDecreaseKeys); //creating new heap
         heap2.min = newitem;
         heap2.size = 1;
+        heap2.rootList = new HeapNodeList(node);
 
         this.meld(heap2);  //melding the two heaps
 
@@ -148,11 +149,13 @@ public class Heap
         this.totalCuts += heap2.totalCuts;
         this.totalHeapifyCosts += heap2.totalHeapifyCosts;
         this.totalMarkedNodes += heap2.totalMarkedNodes;
+        this.totalLinks += heap2.totalLinks;
         this.size += heap2.size;
 
 
         if(this.min == null){  //if heap is empty 
             this.min = heap2.min;
+            this.rootList = heap2.rootList;
             return; 
         }
 
