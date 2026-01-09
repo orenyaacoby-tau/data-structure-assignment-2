@@ -113,7 +113,7 @@ public class Heap
             nextChild = child.next;
             this.rootList.add(child);
             child = nextChild;
-            if(child.equals(firstChild)) break; //to avoid infinite loop
+            if(child != null &&child.equals(firstChild)) break; //to avoid infinite loop
         }
     }
     // helper method for deleteMin
