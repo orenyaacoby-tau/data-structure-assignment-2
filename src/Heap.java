@@ -8,11 +8,14 @@
  */
 public class Heap
 {
+    public int size = 0;
+    public int totalMarkedNodes = 0;
     public int totalCuts = 0;
     public int totalHeapifyCosts = 0;
     public final boolean lazyMelds;
     public final boolean lazyDecreaseKeys;
     public HeapItem min;
+    
     
     /**
      *
@@ -33,9 +36,27 @@ public class Heap
      * Insert (key,info) into the heap and return the newly generated HeapNode.
      *
      */
-    public HeapItem insert(int key, String info) 
+    public HeapItem insert(int key, String info)   
     {    
-        return null; // should be replaced by student code
+        HeapNode node = new HeapNode(); //creating the new node 
+        node.next = node;
+        node.prev = node;
+        node.rank = 0;
+
+        HeapItem newitem = new HeapItem(); //creating the nodeItem
+        newitem.key = key;
+        newitem.info = info;
+
+        node.item = newitem;
+        newitem.node= node;
+
+        Heap heap2 = new Heap(this.lazyMelds,this.lazyDecreaseKeys); //creating new heap
+        heap2.min = newitem;
+        heap2.size = 1;
+
+        this.meld(heap2);  //melding the two heaps
+
+        return newitem; 
     }
 
     /**
@@ -111,8 +132,21 @@ public class Heap
      * pre: heap2.lazyMelds = this.lazyMelds AND heap2.lazyDecreaseKeys = this.lazyDecreaseKeys
      *
      */
-    public void meld(Heap heap2)
+    public void meld(Heap heap2)  
     {
+        if(heap2 == null || heap2.min == null) return;  //if heap2 is empty 
+
+        this.totalCuts += heap2.totalCuts;
+        this.totalHeapifyCosts += heap2.totalHeapifyCosts;
+        this.totalMarkedNodes += heap2.totalMarkedNodes;
+        this.size += heap2.size;
+
+
+        if(this.min == null){  //if heap is empty 
+            this.min = heap2.min;
+            return; 
+        }
+
         HeapNode nodeA = this.min.node;
         HeapNode nodeB = heap2.min.node;
         HeapNode nextA = nodeA.next;
@@ -124,16 +158,13 @@ public class Heap
         nodeB.next = nextA;
         nextA.prev = nodeB;
 
+        if(this.min.key > heap2.min.key){  //updating the min 
+            this.min = heap2.min;
+        }
+
         if(this.lazyMelds == true) return;
 
-        //====neet to add the option if lazyMelds is false===//
-
-        
-
-        
-
-
-
+        this.successive_linking();
         return; // should be replaced by student code           
     }
     
@@ -145,7 +176,7 @@ public class Heap
      */
     public int size()
     {
-        return 46; // should be replaced by student code
+        return this.size; 
     }
 
 
@@ -156,7 +187,7 @@ public class Heap
      */
     public int numTrees()
     {
-        return 46; // should be replaced by student code
+        return; // should be replaced by student code
     }
     
     
@@ -167,7 +198,7 @@ public class Heap
      */
     public int numMarkedNodes()
     {
-        return 46; // should be replaced by student code
+        return this.totalMarkedNodes; 
     }
     
     
@@ -230,12 +261,12 @@ public class Heap
 
     /**==================== helper_methods ====================*/
     private void heapifyUp(HeapNode node) {
-    while (node.parent != null && node.parent.item.key > node.item.key) {
-        totalHeapifyCosts++;    
+    while (node.parent != null && node.parent.item.key > node.item.key) { //while the node is not a root and we...
+        totalHeapifyCosts++;                                              //violate the heap rule 
         HeapItem parentItem = node.parent.item;
         HeapItem childItem = node.item;
 
-        node.parent.item = childItem;
+        node.parent.item = childItem;  //replacing between the child and the parent 
         node.item = parentItem;
 
         node.parent.item.node = node.parent;
@@ -268,13 +299,22 @@ public class Heap
         this.meld(tmpHeap);
 
         if(parent.parent == null) break;  //if the parent is a root 
+
         if(parent.marked == false){       //if the parent is not marked 
             parent.marked = true;
+            this.totalMarkedNodes ++
             break;
         }
         node = parent;
         }
         while(true);
-}
+        }
+
+    private void successive_linking(){
+        return;
+    }
+
+
+    
 
 }
