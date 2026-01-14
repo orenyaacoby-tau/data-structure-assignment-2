@@ -1,7 +1,4 @@
 
-import java.util.LinkedList;
-import java.util.List;
-
 /**
  * Heap
  *
@@ -22,7 +19,11 @@ public class Heap
     public HeapItem min;
     private HeapNodeList rootList; //list of root nodes
     
-    
+    @Override
+    public String toString(){
+        return rootList.start.toString();
+    }
+
     /**
      *
      * Constructor to initialize an empty heap.
@@ -32,6 +33,7 @@ public class Heap
     {
         this.lazyMelds = lazyMelds;
         this.lazyDecreaseKeys = lazyDecreaseKeys;
+        this.rootList = new HeapNodeList();
         // student code can be added here
         
     }
@@ -92,10 +94,10 @@ public class Heap
             return;
         }
         HeapNode minNode = this.min.node;
-        this.size --;
+        this.size--;
         this.rootList.remove(minNode); //removing the min node from the root list
         if(minNode.rank > 0){ //if the min node has children    
-            addChildrenToRootList(minNode);
+            addChildrenToRootList2(minNode);
         }
         updateMin();
         successive_linking();
@@ -116,16 +118,40 @@ public class Heap
             if(child != null &&child.equals(firstChild)) break; //to avoid infinite loop
         }
     }
+    private void addChildrenToRootList2(HeapNode minNode){
+        HeapNode child = minNode.child;
+        HeapNode next = child.next;
+        int rank = minNode.rank;
+        Heap heap2 = new Heap(lazyMelds, lazyDecreaseKeys);
+        heap2.size = rank;
+        this.size-=rank;
+        for(int i =0;i<rank;i++){
+            next = child.next;
+            child.prev = null;
+            child.next = null;
+            child.parent = null;
+            heap2.rootList.add(child);
+            child = next;
+            
+        }
+        heap2.updateMin();
+        this.meld(heap2);
+        
+    }
     // helper method for deleteMin
     private void updateMin(){
-        assert (this.rootList.size >= 0);
-        HeapNode current = this.rootList.start;
-        HeapItem minItem = current.item;
+        if (this.rootList.size == 0){
+            this.min = null;
+            return;
+        }
+
+        HeapItem minItem =this.rootList.start.item;
         for(HeapNode node : this.rootList){
             if(node.item.key < minItem.key){
                 minItem = node.item;
             }
         }
+
         this.min = minItem;
     }
     /**
@@ -304,6 +330,11 @@ public class Heap
         public HeapNode parent;
         public int rank;
         public boolean marked = false;
+
+        @Override
+        public String toString(){
+            return "rank: "+ rank + "item: "+ item.toString();
+        }
     }
     
     /**
@@ -314,6 +345,11 @@ public class Heap
         public HeapNode node;
         public int key;
         public String info;
+
+        @Override
+        public String toString(){
+            return "key: " + key;
+        }
     }
 
     /**
@@ -325,10 +361,16 @@ public class Heap
         public HeapNode end;
         public int size = 0;
 
+        private void update_start_end(){ //helper
+            this.start.prev = this.end;
+            this.end.next = this.start;
+        }
+
         public HeapNodeList(HeapNode node){
             this.start = node;
             this.end = node;
             this.size = 1;
+            this.update_start_end();
         }
         public HeapNodeList(){
             this.start = null;
@@ -337,6 +379,13 @@ public class Heap
         }
 
         public void add(HeapNode node){
+            if (this.size ==0){
+                this.end = node;
+                this.start = node;
+                this.size++;
+                update_start_end();
+                return;
+            }
             this.end.next = node;
             node.prev = this.end;
             this.end = node;
@@ -344,42 +393,69 @@ public class Heap
             if (this.start == null){
                 this.start = node;
             }
+            this.update_start_end();
         }
+
         public void remove(HeapNode node){
             assert this.size !=0;
             if(this.size == 1){
                 this.start = null;
                 this.end = null;
-            } else {
-                if(node == this.start){
-                    this.start = node.next;
-                }
-                else{
-                    if(node == this.end){
-                        this.end = node.prev;
-                    }
-                    else{
-                        node.prev.next = node.next;
-                        node.next.prev = node.prev;
-                    }
+                this.size = 0;
+                return;
             }
+            if(node == this.end){
+                this.end = this.end.prev;
+                update_start_end();
+                this.size--;
+                return;
             }
+            if (node == this.start) {
+                this.start = this.start.next;
+                update_start_end();
+                this.size--;
+                return;
+            }
+
+            else{
+                node.prev.next = node.next;
+                node.next.prev = node.prev;
+            }
+            
+            
             this.size --;
+            this.update_start_end();
         }
       //  @pre // afterNode in list
         public void insertAfter(HeapNode node, HeapNode afterNode){
             assert this.size !=0;
+            if (this.end.equals(afterNode)){
+                this.add(node);
+                return;
+            }
             HeapNode nextNode = afterNode.next;
             afterNode.next = node;
             node.prev = afterNode;
             node.next = nextNode;
             nextNode.prev = node;
+            this.update_start_end();
         }
         public void link(HeapNodeList other){
+            if (other.size==0){
+                return;
+            }
+            if (this.size == 0){
+                this.size = other.size;
+                this.end = other.end;
+                this.start = other.start;
+                return;
+            }
             this.end.next = other.start;
             other.start.prev = this.end;
             this.end = other.end;
             this.size += other.size;
+
+            this.update_start_end();
         }
 
         @Override
@@ -457,26 +533,33 @@ public class Heap
         }
 
     private void successive_linking(){
-        int[] rankArray = new int[this.size + 1]; //array to store the nodes of each rank, all zeros
-        HeapNode[] nodesByRank = new HeapNode[this.size + 1]; //array to store the nodes of each rank, all nulls
+        int[] rankArray = new int[this.size]; //array to store the nodes of each rank, all zeros
+        HeapNode[] nodesByRank = new HeapNode[this.size ]; //array to store the nodes of each rank, all nulls
 
+        HeapNode root = rootList.start;
+        HeapNode tmp_root;
+        HeapNode next;
+        int s = this.rootList.size;
+        for (int i = 0; i<s;i++){
+            next = root.next;
 
-        for (HeapNode root : this.rootList) {
             int rank = root.rank;
             if (rankArray[rank] == 0){
                 rankArray[rank] =1;
                 nodesByRank[rank] = root;
             } else {
+                tmp_root = root;
                 while (rankArray[rank] != 0) {
-                    root = link(root, nodesByRank[rank]); //linking the two nodes
+                    tmp_root = link(tmp_root, nodesByRank[rank]); //linking the two nodes
                     rankArray[rank] = 0;
                     nodesByRank[rank] = null;
                     rank++;
-                    assert rank == root.rank;
+                    assert rank == tmp_root.rank;
                 }
                 rankArray[rank] =1;
-                nodesByRank[rank] = root;
+                nodesByRank[rank] = tmp_root;
             }
+            root = next;
         }
         return;
     }
@@ -497,13 +580,16 @@ public class Heap
         if(nodeA.rank == 0){
             nodeA.child = nodeB;
             nodeB.parent = nodeA;
-            nodeA.rank = 1;
+            nodeB.next = null;
+            nodeB.prev = null;
+            //nodeA.rank = 1;
         } else {
             HeapNode child = nodeA.child;
             nodeB.next = child;
             nodeB.prev = child.prev;
             child.prev = nodeB;
-            nodeB.prev.next = nodeB;
+            if (nodeB.prev != null )
+                nodeB.prev.next = nodeB;
         }
         nodeB.parent = nodeA;
         nodeA.rank ++;
