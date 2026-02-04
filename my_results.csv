@@ -1,0 +1,49 @@
+Experiment results for n=464646, lazyMelds=true, lazyDecreaseKeys=true
+Time(ns),Size,NumTrees,TotalLinks,TotalCuts,TotalHeapifyCosts,MaxOperationCost
+492878700,464645,9,464636,0,0,464636
+done 1
+Time(ns),Size,NumTrees,TotalLinks,TotalCuts,TotalHeapifyCosts,MaxOperationCost
+
+169139421800,46,4,748709,748667,0,464636
+done 2
+Time(ns),Size,NumTrees,TotalLinks,TotalCuts,TotalHeapifyCosts,MaxOperationCost
+
+147455100,464644,11,511590,46957,0,464636
+done 3
+Experiment results for n=464646, lazyMelds=false, lazyDecreaseKeys=true
+Time(ns),Size,NumTrees,TotalLinks,TotalCuts,TotalHeapifyCosts,MaxOperationCost
+153061044800,464645,9,464654,0,0,18
+done 1
+Time(ns),Size,NumTrees,TotalLinks,TotalCuts,TotalHeapifyCosts,MaxOperationCost
+
+659112493800,46,3,1398227,748920,0,39
+done 2
+Time(ns),Size,NumTrees,TotalLinks,TotalCuts,TotalHeapifyCosts,MaxOperationCost
+
+213731996400,464644,10,511638,46970,0,18
+done 3
+Experiment results for n=464646, lazyMelds=true, lazyDecreaseKeys=false
+Time(ns),Size,NumTrees,TotalLinks,TotalCuts,TotalHeapifyCosts,MaxOperationCost
+160662500,464645,9,464636,0,0,464636
+done 1
+Time(ns),Size,NumTrees,TotalLinks,TotalCuts,TotalHeapifyCosts,MaxOperationCost
+
+166869186000,46,4,7553129,0,4152180,464636
+done 2
+Time(ns),Size,NumTrees,TotalLinks,TotalCuts,TotalHeapifyCosts,MaxOperationCost
+
+161388300,464644,8,464654,0,116599,464636
+done 3
+Experiment results for n=464646, lazyMelds=false, lazyDecreaseKeys=false
+Time(ns),Size,NumTrees,TotalLinks,TotalCuts,TotalHeapifyCosts,MaxOperationCost
+161779427900,464645,9,464654,0,0,18
+done 1
+Time(ns),Size,NumTrees,TotalLinks,TotalCuts,TotalHeapifyCosts,MaxOperationCost
+
+426998439600,46,4,7552732,0,4148500,35
+done 2
+Time(ns),Size,NumTrees,TotalLinks,TotalCuts,TotalHeapifyCosts,MaxOperationCost
+
+94479226800,464644,8,464671,0,116507,18
+done 3
+

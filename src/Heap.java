@@ -86,13 +86,16 @@ public class Heap
      */
     public void deleteMin()
     {
-        if(this.min == null) return; //if the heap is empty
+        if(this.min == null){
+             return; //if the heap is empty
+        }
         if(this.size == 1){ //if the heap has one item
             this.min = null;
             this.rootList = new HeapNodeList();
             this.size = 0;
             return;
         }
+        updateMin();
         HeapNode minNode = this.min.node;
         this.size--;
         this.rootList.remove(minNode); //removing the min node from the root list
@@ -104,19 +107,6 @@ public class Heap
 
 
         return; // should be replaced by student code
-    }
-    // helper method for deleteMin
-    private void addChildrenToRootList(HeapNode minNode){
-        HeapNode child = minNode.child;
-        HeapNode nextChild;
-        HeapNode firstChild = child;
-
-        while(child != null){ //adding all the children to the root list
-            nextChild = child.next;
-            this.rootList.add(child);
-            child = nextChild;
-            if(child != null &&child.equals(firstChild)) break; //to avoid infinite loop
-        }
     }
     private void addChildrenToRootList2(HeapNode minNode){
         HeapNode child = minNode.child;
@@ -141,6 +131,7 @@ public class Heap
     // helper method for deleteMin
     private void updateMin(){
         if (this.rootList.size == 0){
+            System.out.println();
             this.min = null;
             return;
         }
@@ -197,7 +188,7 @@ public class Heap
      */
     public void delete(HeapItem x) 
     {    
-        this.decreaseKey(x, x.key);
+        this.decreaseKey(x, x.key); //decreasing the key to negative value
         this.deleteMin();
         return; // should be replaced by student code
     }
@@ -303,7 +294,7 @@ public class Heap
      */
     public int totalCuts()
     {
-        return 46; // should be replaced by student code
+        return this.totalCuts; // should be replaced by student code
     }
     
 
@@ -314,7 +305,7 @@ public class Heap
      */
     public int totalHeapifyCosts()
     {
-        return 46; // should be replaced by student code
+        return this.totalHeapifyCosts; // should be replaced by student code
     }
     
     
@@ -496,11 +487,13 @@ public class Heap
 
         node = node.parent;
     }
+    
     }
 
 
 
     private void cascadingCut(HeapNode node){
+        if (node.parent == null) return; //if the node is a root
         do{
             HeapNode parent = node.parent;
             this.totalCuts ++;
@@ -509,8 +502,10 @@ public class Heap
                 if(node.next == node) parent.child = null;
                 else parent.child = node.next;
             }
-        node.next.prev =  node.prev;
-        node.prev.next = node.next;
+        if(node.next != null)
+            node.next.prev =  node.prev;
+        if(node.prev != null)
+            node.prev.next = node.next;
         node.next = node;
         node.prev = node;
         node.parent = null;
@@ -518,6 +513,8 @@ public class Heap
 
         Heap tmpHeap = new Heap(this.lazyMelds ,this.lazyDecreaseKeys);  //creating new heap
         tmpHeap.min = node.item;
+        tmpHeap.size = 0;
+        tmpHeap.rootList = new HeapNodeList(node);
         this.meld(tmpHeap);
 
         if(parent.parent == null) break;  //if the parent is a root 
