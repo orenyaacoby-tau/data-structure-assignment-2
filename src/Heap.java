@@ -18,11 +18,7 @@ public class Heap
     public final boolean lazyDecreaseKeys;
     public HeapItem min;
     private HeapNodeList rootList; //list of root nodes
-    
-    @Override
-    public String toString(){
-        return rootList.start.toString();
-    }
+
 
     /**
      *
@@ -100,7 +96,7 @@ public class Heap
         this.size--;
         this.rootList.remove(minNode); //removing the min node from the root list
         if(minNode.rank > 0){ //if the min node has children    
-            addChildrenToRootList2(minNode);
+            addChildrenToRootList(minNode);
         }
         updateMin();
         successive_linking();
@@ -108,7 +104,7 @@ public class Heap
 
         return; // should be replaced by student code
     }
-    private void addChildrenToRootList2(HeapNode minNode){
+    private void addChildrenToRootList(HeapNode minNode){
         HeapNode child = minNode.child;
         HeapNode next = child.next;
         int rank = minNode.rank;
@@ -322,10 +318,7 @@ public class Heap
         public int rank;
         public boolean marked = false;
 
-        @Override
-        public String toString(){
-            return "rank: "+ rank + "item: "+ item.toString();
-        }
+
     }
     
     /**
@@ -337,10 +330,7 @@ public class Heap
         public int key;
         public String info;
 
-        @Override
-        public String toString(){
-            return "key: " + key;
-        }
+
     }
 
     /**
@@ -530,8 +520,9 @@ public class Heap
         }
 
     private void successive_linking(){
-        int[] rankArray = new int[this.size]; //array to store the nodes of each rank, all zeros
-        HeapNode[] nodesByRank = new HeapNode[this.size ]; //array to store the nodes of each rank, all nulls
+        int logsize = (int) Math.ceil(Math.log(this.size)*3);
+        int[] rankArray = new int[logsize]; //array to store the ranks of each node, all zeros
+        HeapNode[] nodesByRank = new HeapNode[logsize ]; //array to store the nodes of each rank, all nulls
 
         HeapNode root = rootList.start;
         HeapNode tmp_root;
@@ -565,7 +556,7 @@ public class Heap
      *  both nodes must be root nodes
     */
     private HeapNode link(HeapNode nodeA, HeapNode nodeB){
-        assert (nodeA.rank != nodeB.rank); // ranks must be equal
+        assert (nodeA.rank == nodeB.rank); // ranks must be equal
         if(nodeA.item.key > nodeB.item.key){
             HeapNode temp = nodeA;
             nodeA = nodeB;
